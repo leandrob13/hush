@@ -1,0 +1,61 @@
+[tool.poetry]
+name = "ref-arch"
+version = "0.2.1"
+description = ""
+authors = ["Leandro Bolivar <lbolivar@finmaq.com.co>"]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+certifi = "^2024.2.2"
+loguru = "^0.7.2"
+pydantic = "^2.0.3"
+
+[tool.poetry.dev-dependencies]
+pytest = "<8.0.0"
+pytest-asyncio = "^0.23.4"
+pytest-cov = "^4.1.0"
+factory_boy = "*"
+mypy = "*"
+black = "^24.2.0"
+invoke = "*"
+pre-commit = "*"
+commitizen = "*"
+vulture = "*"
+
+
+[tool.poetry.group.http.dependencies]
+fastapi = "^0.109.2"
+uvicorn = "^0.27.0"
+gunicorn = "^21.2.0"
+httpx = "^0.26.0"
+asyncpg = "^0.29.0"
+
+[tool.poetry.group.dev.dependencies]
+aws-lambda-powertools = {extras = ["aws-sdk"], version = "^2.34.0"}
+cdk-aws-lambda-powertools-layer = "^3.7.0"
+aws-cdk-lib = "^2.129.0"
+constructs = ">=10.0.0"
+aws-cdk-aws-lambda-python-alpha = "^2.129.0a0"
+
+
+[tool.commitizen]
+name = "cz_conventional_commits"
+tag_format = "$version"
+version_scheme = "semver"
+version_provider = "poetry"
+changelog_incremental = true
+update_changelog_on_bump = true
+
+[tool.vulture]
+exclude = ["src/test/"]
+ignore_decorators = [ "@app.*","@router.*"]
+ignore_names = ["lambda_handler"]
+min_confidence = 70
+sort_by_size = true
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[virtualenvs]
+in-project = true

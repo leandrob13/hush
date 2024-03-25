@@ -1,0 +1,28 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v2.2.1
+    hooks:
+      - id: no-commit-to-branch
+        args: [ --branch, production, --branch, main, --pattern, '^(?!(build|ci|docs|feat|fix|perf|refactor|style|test|chore|revert|bump)-SQUAD-\d{2,5}-([\w-]+)$).*' ]
+        stages: [pre-commit]
+  - repo: local
+    hooks:
+      - id: black
+        name: Format code
+        language: system
+        entry: poetry run invoke formatcode --check
+        pass_filenames: false
+        stages: [ pre-commit ]
+  - repo: local
+    hooks:
+      - id: commitizen
+        name: Check commit
+        language: system
+        entry: poetry run invoke commitizen
+        pass_filenames: false
+        stages: [commit-msg]
+  - repo: https://github.com/Lucas-C/pre-commit-hooks-safety
+    rev: v1.3.1
+    hooks:
+      - id: python-safety-dependencies-check
+        files: pyproject.toml
