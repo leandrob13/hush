@@ -1,5 +1,5 @@
 from pydantic import BaseModel
 
 
-class UserNotFoundDTO(BaseModel):
+class CipherError(BaseModel):
     message: str
