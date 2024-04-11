@@ -1,6 +1,6 @@
 [tool.poetry]
-name = "ref-arch"
-version = "0.2.1"
+name = "hush"
+version = "0.1.0"
 description = ""
 authors = ["Leandro Bolivar <lbolivar@finmaq.com.co>"]
 
@@ -8,35 +8,29 @@ authors = ["Leandro Bolivar <lbolivar@finmaq.com.co>"]
 python = "^3.12"
 certifi = "^2024.2.2"
 loguru = "^0.7.2"
-pydantic = "^2.0.3"
+pydantic = "^2.6.4"
+cryptography = "^42.0.5"
+httpx = "^0.27.0"
 
 [tool.poetry.dev-dependencies]
-pytest = "<8.0.0"
+pytest = "^8.1.1"
 pytest-asyncio = "^0.23.4"
-pytest-cov = "^4.1.0"
-factory_boy = "*"
+pytest-cov = "^5.0.0"
 mypy = "*"
-black = "^24.2.0"
 invoke = "*"
 pre-commit = "*"
 commitizen = "*"
 vulture = "*"
-
-
-[tool.poetry.group.http.dependencies]
-fastapi = "^0.109.2"
-uvicorn = "^0.27.0"
-gunicorn = "^21.2.0"
-httpx = "^0.26.0"
-asyncpg = "^0.29.0"
+ruff = "*"
+genbadge = {extras = ["test", "coverage"], version = "*"}
 
 [tool.poetry.group.dev.dependencies]
 aws-lambda-powertools = {extras = ["aws-sdk"], version = "^2.34.0"}
 cdk-aws-lambda-powertools-layer = "^3.7.0"
 aws-cdk-lib = "^2.129.0"
 constructs = ">=10.0.0"
+aws-xray-sdk = "*"
 aws-cdk-aws-lambda-python-alpha = "^2.129.0a0"
-
 
 [tool.commitizen]
 name = "cz_conventional_commits"
@@ -52,6 +46,46 @@ ignore_decorators = [ "@app.*","@router.*"]
 ignore_names = ["lambda_handler"]
 min_confidence = 70
 sort_by_size = true
+
+[tool.pytest.ini_options]
+addopts = """
+--cov=src \
+--cov-report term \
+--cov-report html:htmlcov \
+--cov-report xml:reports/coverage/coverage.xml \
+--junitxml=reports/junit/junit.xml
+"""
+
+[tool.coverage.run]
+branch = false
+omit = ["src/config.py", "src/test/*", "src/http/*", "infrastructure/*"]
+
+[tool.coverage.report]
+fail_under = 69.0
+skip_empty = true
+
+[tool.ruff]
+respect-gitignore = true
+
+[tool.mypy]
+plugins = "pydantic.mypy"
+follow_imports = "normal"
+strict_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+disallow_any_generics = true
+check_untyped_defs = true
+# for strict mypy: (this is the tricky one :-))
+disallow_untyped_defs = true
+exclude = "src/test/"
+ignore_missing_imports = true
+disable_error_code = ["valid-type"]
+
+[tool.pydantic-mypy]
+init_forbid_extra = true
+init_typed = true
+warn_required_dynamic_aliases = true
+warn_untyped_fields = true
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
