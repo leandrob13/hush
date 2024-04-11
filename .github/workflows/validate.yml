@@ -1,9 +1,9 @@
 name: Validate
 
 on:
-  push:
-    branches-ignore:
-      - main
+  pull_request:
+    types: [ opened, synchronize, reopened, edited ]
+  pull_request_target:
 
 jobs:
   validate:
@@ -13,6 +13,8 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
+      with:
+        ref: ${{ github.head_ref }}
 
     - name: Set up Python
       uses: actions/setup-python@v5
@@ -27,3 +29,20 @@ jobs:
 
     - name: Run validate
       run: poetry run invoke validate --check
+
+    - name: Pytest coverage comment
+      uses: MishaKav/pytest-coverage-comment@main
+      with:
+        pytest-xml-coverage-path: reports/coverage/coverage.xml
+        junitxml-path: reports/junit/junit.xml
+        title: Coverage Report
+        badge-title: Coverage
+        unique-id-for-comment: python3.12
+        junitxml-title: Tests Summary
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Push changes
+      uses: ad-m/github-push-action@master
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        branch: ${{ github.head_ref }}
