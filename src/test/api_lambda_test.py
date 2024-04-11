@@ -1,6 +1,9 @@
 from datetime import datetime
+from typing import Any
 from urllib.parse import urlparse
 
+import httpx
+from _pytest.monkeypatch import MonkeyPatch
 from aws_lambda_powertools.utilities.data_classes import APIGatewayProxyEventV2
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
@@ -9,7 +12,6 @@ from src.lambda_functions.api_lambda import lambda_handler, service
 
 
 class MockLambdaContext(LambdaContext):
-
     def __init__(self) -> None:
         self._function_name = "test"
         self._memory_limit_in_mb = 128
@@ -17,7 +19,12 @@ class MockLambdaContext(LambdaContext):
         self._aws_request_id = "12345"
 
 
-def test_create_secret():
+def mock_return(a: Any, b: Any) -> httpx.Response:
+    return httpx.Response(status_code=200, json={"SecretString": "secret"})
+
+
+def test_create_secret(monkeypatch: MonkeyPatch) -> None:
+    monkeypatch.setattr(httpx.Client, "get", mock_return)
     lambda_context = MockLambdaContext()
     data = {
         "path": "/hush/secrets",
@@ -36,8 +43,10 @@ def test_create_secret():
     assert response["body"] != ""
 
 
-def test_decrypt_secret():
+def test_decrypt_secret(monkeypatch: MonkeyPatch):
+    monkeypatch.setattr(httpx.Client, "get", mock_return)
     lambda_context = MockLambdaContext()
+
     secret = "this is a secret"
     data = {
         "httpMethod": "POST",
@@ -61,8 +70,10 @@ def test_decrypt_secret():
     assert cipher_response["body"] == secret
 
 
-def test_invalid_secret():
+def test_invalid_secret(monkeypatch: MonkeyPatch):
+    monkeypatch.setattr(httpx.Client, "get", mock_return)
     lambda_context = MockLambdaContext()
+
     secret = "this is a secret"
     payload: PayLoad = PayLoad(message=secret, expiration_date=datetime.now())
     ciphertext = service.encrypt(payload)

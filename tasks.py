@@ -5,9 +5,14 @@ from shutil import copytree, rmtree
 
 @task
 def formatcode(c, check=False):
-    print("Running black formatter")
-    c.run(f"poetry run black infrastructure{' --check' if check else ''}")
-    c.run(f"poetry run black src{' --check' if check else ''}")
+    print("Running ruff formatter")
+    c.run(f"poetry run ruff format infrastructure src{' --check' if check else ''}")
+
+
+@task
+def lintcode(c):
+    print("Running ruff lint")
+    c.run("poetry run ruff check infrastructure src")
 
 
 @task
@@ -20,8 +25,9 @@ def mypy(c):
 @task
 def tests(c):
     print("Running pytest")
-    c.run("poetry run pytest src/test --cov=src")
-    c.run("poetry run coverage html -i")
+    c.run("poetry run pytest src/test -p no:warnings")
+    c.run("poetry run genbadge tests -o reports/junit/junit-badge.svg")
+    c.run("poetry run genbadge coverage -o reports/coverage/coverage-badge.svg")
 
 
 @task
@@ -30,7 +36,7 @@ def vulture(c):
     c.run("poetry run vulture src")
 
 
-@task(vulture, mypy, tests)
+@task(vulture, mypy, lintcode, tests)
 def validate(c, check=False):
     formatcode(c, check)
     print("DONE VALIDATING")
