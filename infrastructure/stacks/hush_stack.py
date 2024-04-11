@@ -1,7 +1,15 @@
 from typing import TypedDict
 
 from aws_cdk.aws_lambda_python_alpha import PythonLayerVersion
-from aws_cdk import aws_lambda, aws_apigateway, RemovalPolicy, aws_cognito, Stack
+from aws_cdk import (
+    aws_lambda,
+    aws_apigateway,
+    aws_secretsmanager,
+    RemovalPolicy,
+    Stack,
+    Duration,
+)
+from aws_cdk.aws_secretsmanager import SecretStringGenerator
 from cdk_aws_lambda_powertools_layer import LambdaPowertoolsLayer
 from constructs import Construct
 
@@ -15,35 +23,35 @@ from .config import (
     AGW_REST_API_ROOT,
     AGW_REST_API_STAGE,
     POWERTOOLS_LAYER_ID,
-    USER_POOL_NAME,
-    USER_POOL_CLIENT_NAME,
-    USER_POOL_AUTHORIZER_NAME,
     LAMBDA_POWERTOOLS_VERSION,
+    SALT_SECRET_NAME,
+    PASSPRHASE_SECRET_NAME,
 )
 
 
-class RefArchLambdaStack(Stack):
-
+class HushLambdaStack(Stack):
     def __init__(self, scope: Construct, id: str, **kwargs: TypedDict) -> None:
         super().__init__(scope, id, **kwargs)
 
-        user_pool = aws_cognito.UserPool(self, USER_POOL_NAME)
-        user_pool.add_client(
-            USER_POOL_CLIENT_NAME,
-            auth_flows=aws_cognito.AuthFlow(user_password=True),
-            supported_identity_providers=[
-                aws_cognito.UserPoolClientIdentityProvider.COGNITO
-            ],
+        salt_secret = aws_secretsmanager.Secret(
+            self,
+            "SaltSecret",
+            secret_name=SALT_SECRET_NAME,
+            generate_secret_string=SecretStringGenerator(password_length=16),
         )
-        authorizer = aws_apigateway.CognitoUserPoolsAuthorizer(
-            self, USER_POOL_AUTHORIZER_NAME, cognito_user_pools=[user_pool]
+
+        passphrase_secret = aws_secretsmanager.Secret(
+            self,
+            "PassphraseSecret",
+            secret_name=PASSPRHASE_SECRET_NAME,
+            generate_secret_string=SecretStringGenerator(password_length=16),
         )
 
         power_tools_layer = LambdaPowertoolsLayer(
             self,
             POWERTOOLS_LAYER_ID,
             include_extras=True,
-            layer_version_name="PowerToolsRefArch",
+            layer_version_name="PowerToolsHush",
             version=LAMBDA_POWERTOOLS_VERSION,
         )
         dependencies_layer = PythonLayerVersion(
@@ -62,6 +70,10 @@ class RefArchLambdaStack(Stack):
             removal_policy=RemovalPolicy.DESTROY,
         )
 
+        secrets_extension = aws_lambda.ParamsAndSecretsLayerVersion.from_version(
+            aws_lambda.ParamsAndSecretsVersions.V1_0_103, cache_enabled=True
+        )
+
         base_lambda = aws_lambda.Function(
             self,
             LAMBDA_NAME,
@@ -69,8 +81,17 @@ class RefArchLambdaStack(Stack):
             runtime=aws_lambda.Runtime.PYTHON_3_12,
             code=aws_lambda.Code.from_asset(LAMBDA_BUILD_DIR),
             layers=[dependencies_layer, app_layer, power_tools_layer],
+            params_and_secrets=secrets_extension,
             tracing=aws_lambda.Tracing.ACTIVE,
+            environment={
+                "SALT_NAME": salt_secret.secret_name,
+                "PASSPHRASE_NAME": passphrase_secret.secret_name,
+            },
+            timeout=Duration.minutes(1),
         )
+
+        salt_secret.grant_read(base_lambda)
+        passphrase_secret.grant_read(base_lambda)
 
         # create a RestApi resource
         base_api = aws_apigateway.RestApi(
@@ -87,11 +108,6 @@ class RefArchLambdaStack(Stack):
         # add proxy and points to lambda funcion
         ref_arch.add_proxy(
             default_integration=aws_apigateway.LambdaIntegration(base_lambda),
-            default_method_options=aws_apigateway.MethodOptions(
-                authorization_type=aws_apigateway.AuthorizationType.COGNITO,
-                authorizer=authorizer,
-                authorization_scopes=["aws.cognito.signin.user.admin"],
-            ),
             default_cors_preflight_options=aws_apigateway.CorsOptions(
                 allow_methods=["GET", "POST"],
                 allow_origins=aws_apigateway.Cors.ALL_ORIGINS,

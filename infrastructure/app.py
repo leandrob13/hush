@@ -3,10 +3,10 @@ import os
 from aws_cdk import App, Environment
 
 from stacks.config import LAMBDA_STACK_ID
-from stacks.ref_arch_stack import RefArchLambdaStack
+from stacks.hush_stack import HushLambdaStack
 
 app = App()
-RefArchLambdaStack(
+HushLambdaStack(
     app,
     LAMBDA_STACK_ID,
     env=Environment(

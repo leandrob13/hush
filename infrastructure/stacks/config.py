@@ -1,3 +1,5 @@
+import os
+
 DEPENDENCIES_LAYER_DIR = "build/dependencies_layer/"
 
 LAMBDA_BUILD_DIR = "build/lambdas/"
@@ -6,25 +8,22 @@ LAMBDA_APP_LAYER = "build/app_layer/"
 
 LAMBDA_HANDLER_PATH = "lambda_functions.api_lambda.lambda_handler"
 
-LAMBDA_NAME = "ref-arch"
+LAMBDA_NAME = "hush"
 
-AGW_REST_API_NAME = "ref-arch-rest-api"
+AGW_REST_API_NAME = "hush-rest-api"
 
-AGW_REST_API_ROOT = "ref-arch"
+AGW_REST_API_ROOT = "hush"
 
-AGW_REST_API_STAGE = "dev"
+AGW_REST_API_STAGE = os.getenv("API_STAGE_ENV", "dev")
 
 POWERTOOLS_LAYER_ID = "AWSLambdaPowertoolsPythonV2"
 
-LAMBDA_STACK_ID = "ref-arch-lambda-stack"
+LAMBDA_STACK_ID = "hush-lambda-stack"
 
 LAMBDA_POWERTOOLS_VERSION = "2.34.2"
 
-# Cognito
-USER_POOL_NAME = "dev-user-pool"
+# Secrets
 
-USER_POOL_CLIENT_NAME = "dev-app-client"
+SALT_SECRET_NAME = f"HUSH_SALT_{os.getenv('ENVIRONMENT', 'DEV')}"
 
-USER_POOL_AUTHORIZER_NAME = "dev-user-pool-authorizer"
-
-USER_POOL_STACK_ID = "dev-cognito-user-pool-stack"
+PASSPRHASE_SECRET_NAME = f"HUSH_PASSPHRASE_{os.getenv('ENVIRONMENT', 'DEV')}"
