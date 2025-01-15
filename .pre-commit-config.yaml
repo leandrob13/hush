@@ -23,7 +23,7 @@ repos:
         pass_filenames: false
         stages: [commit-msg]
   - repo: https://github.com/Lucas-C/pre-commit-hooks-safety
-    rev: v1.3.1
+    rev: v1.3.3
     hooks:
       - id: python-safety-dependencies-check
         files: pyproject.toml

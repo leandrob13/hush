@@ -20,7 +20,7 @@ POWERTOOLS_LAYER_ID = "AWSLambdaPowertoolsPythonV2"
 
 LAMBDA_STACK_ID = "hush-lambda-stack"
 
-LAMBDA_POWERTOOLS_VERSION = "2.34.2"
+LAMBDA_POWERTOOLS_VERSION = "2.43.1"
 
 # Secrets
 

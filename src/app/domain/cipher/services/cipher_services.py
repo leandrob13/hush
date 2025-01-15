@@ -1,6 +1,5 @@
 import base64
 import json
-import sys
 from abc import ABC, abstractmethod
 
 from loguru import logger
@@ -11,9 +10,6 @@ from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
 from src.app.domain.cipher.models.errors import CipherError
 from src.app.domain.cipher.models.messages import PayLoad
-
-
-logger.add(sys.stdout, colorize=True, serialize=True)
 
 
 class CipherService(ABC):

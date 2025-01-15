@@ -63,7 +63,7 @@ def buildlambda(c):
     copytree(source, f"{build_lambdas}/lambda_functions", dirs_exist_ok=True)
     copytree(app_source, f"{build_app_layer}/src/app", dirs_exist_ok=True)
     c.run(
-        f"poetry export --without=dev,http --format=requirements.txt > {build_dependencies_layer}/requirements.txt"
+        f"poetry export --without=dev --format=requirements.txt > {build_dependencies_layer}/requirements.txt"
     )
 
 

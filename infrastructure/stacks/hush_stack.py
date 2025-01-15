@@ -86,6 +86,9 @@ class HushLambdaStack(Stack):
             environment={
                 "SALT_NAME": salt_secret.secret_name,
                 "PASSPHRASE_NAME": passphrase_secret.secret_name,
+                "POWERTOOLS_SERVICE_NAME": "hush",
+                "POWERTOOLS_LOG_LEVEL": "INFO",
+                "POWERTOOLS_METRICS_NAMESPACE": "HushLambda",
             },
             timeout=Duration.minutes(1),
         )
