@@ -48,11 +48,7 @@ class CipherService(ABC):
                 message = f"No secrets retrieved: {m1} / {m2}"
                 logger.error(f"Generating Fernet: {message}")
                 return CipherError(message=message)
-            case (CipherError(message=m1), str()) | (_, CipherError(message=m1)):
-                message = f"No secrets retrieved: {m1}"
-                logger.error(f"Generating Fernet: {message}")
-                return CipherError(message=f"No secrets retrieved: {m1}")
-            case (CipherError(message=m1), str()) | (_, CipherError(message=m1)):
+            case (CipherError(message=m1), str()) | (str(), CipherError(message=m1)):
                 message = f"No secrets retrieved: {m1}"
                 logger.error(f"Generating Fernet: {message}")
                 return CipherError(message=f"No secrets retrieved: {m1}")
