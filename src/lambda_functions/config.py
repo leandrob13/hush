@@ -7,7 +7,7 @@ from loguru import logger
 from aws_lambda_powertools.logging.logger import Logger
 from aws_lambda_powertools import Metrics
 
-metrics = Metrics()
+metrics = Metrics(namespace="hush_api")
 
 lambda_logger = Logger(log_uncaught_exceptions=True)
 
