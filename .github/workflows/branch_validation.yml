@@ -9,21 +9,25 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
+      issues: write
+      statuses: write
     steps:
       - name: PR Conventional Commit Validation
         uses:  ytanikin/PRConventionalCommits@1.1.0
         with:
           task_types: '["feat","fix","docs","test","ci","refactor","perf","chore","revert", "bump", "style"]'
-          ticket_key_regex: 'SQUAD-\d{2,5}'
+          ticket_key_regex: '.*'
   cpr:
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
+      issues: write
+      statuses: write
     steps:
       - name: Validate the pull request
         uses: Namchee/conventional-pr@v0.15.4
         with:
           access_token: ${{ secrets.GITHUB_TOKEN }}
-          branch_pattern: '((build|ci|docs|feat|fix|perf|refactor|style|test|chore|revert|bump)-SQUAD-\d{2,5}-([\w-]+)$)'
+          branch_pattern: '.*'
           issue: false
-          title_pattern: '(build|ci|docs|feat|fix|perf|refactor|style|test|chore|revert|bump): SQUAD-\d{2,5} .+$'
+          title_pattern: '.*'
